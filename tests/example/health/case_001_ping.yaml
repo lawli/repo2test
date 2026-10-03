@@ -1,0 +1,25 @@
+schema: v1
+name: case_001_ping
+description: |
+  GET /api/health — minimal liveness smoke case, and the framework's
+  canonical worked example. Copy this as the starting point for a new
+  service suite.
+
+  Health-check carve-out (docs/tightening-criteria.md): liveness probes
+  are exempt from criteria 1-7. A single-field `status: UP` echo is the
+  right shape — do not expand it.
+
+  `service: example` resolves to the `services.example` entry in the
+  active profile (see profiles/); there is no hardcoded service registry.
+service: example
+tags: [smoke, p0, health]
+
+steps:
+  - name: ping
+    request:
+      method: GET
+      path: /api/health
+    assert:
+      status: 200
+      json:
+        status: "UP"

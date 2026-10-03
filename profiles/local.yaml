@@ -1,0 +1,14 @@
+extends: base.yaml
+# Local dev profile. The keys under `services:` define the valid service
+# names for cases — there is no hardcoded registry. Point them at your own
+# locally-running services, and add/rename keys to match your tests/ tree.
+services:
+  example:         { base_url: "http://localhost:8081" }
+  example-payment: { base_url: "http://localhost:8082" }
+databases:
+  example:         { dsn: "mysql://${LOCAL_EXAMPLE_DB_USER}:${LOCAL_EXAMPLE_DB_PASS}@localhost:3306/example" }
+  example-payment: { dsn: "mysql://${LOCAL_EXAMPLE_PAYMENT_DB_USER}:${LOCAL_EXAMPLE_PAYMENT_DB_PASS}@localhost:3306/example_payment" }
+redis:
+  default: { url: "redis://localhost:6379/0" }
+rabbitmq:
+  default: { url: "amqp://${LOCAL_MQ_USER}:${LOCAL_MQ_PASS}@localhost:5672/" }

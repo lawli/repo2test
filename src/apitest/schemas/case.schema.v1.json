@@ -1,0 +1,897 @@
+{
+  "$defs": {
+    "Assert": {
+      "additionalProperties": false,
+      "properties": {
+        "headers": {
+          "additionalProperties": true,
+          "title": "Headers",
+          "type": "object"
+        },
+        "json": {
+          "additionalProperties": true,
+          "title": "Json",
+          "type": "object"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "integer"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "text": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        }
+      },
+      "title": "Assert",
+      "type": "object"
+    },
+    "CoverageRef": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "variant": {
+          "default": "default",
+          "title": "Variant",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "CoverageRef",
+      "type": "object"
+    },
+    "DataPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "cleanup": {
+          "default": "",
+          "title": "Cleanup",
+          "type": "string"
+        },
+        "isolated": {
+          "default": false,
+          "title": "Isolated",
+          "type": "boolean"
+        },
+        "resources": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Resources",
+          "type": "array"
+        }
+      },
+      "title": "DataPlan",
+      "type": "object"
+    },
+    "DbVerify": {
+      "additionalProperties": false,
+      "properties": {
+        "expect_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expect Count"
+        },
+        "expect_rows": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expect Rows"
+        },
+        "sql": {
+          "title": "Sql",
+          "type": "string"
+        },
+        "wait": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WaitSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "sql"
+      ],
+      "title": "DbVerify",
+      "type": "object"
+    },
+    "IdSpecModel": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "int64",
+            "string"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "prefix": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prefix"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "IdSpecModel",
+      "type": "object"
+    },
+    "KnownDefect": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "At"
+        },
+        "env": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Env"
+        },
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        },
+        "step": {
+          "title": "Step",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "step"
+      ],
+      "title": "KnownDefect",
+      "type": "object"
+    },
+    "MqSnifferDecl": {
+      "additionalProperties": false,
+      "properties": {
+        "as": {
+          "title": "As",
+          "type": "string"
+        },
+        "exchange": {
+          "title": "Exchange",
+          "type": "string"
+        },
+        "routing_key": {
+          "title": "Routing Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "exchange",
+        "routing_key",
+        "as"
+      ],
+      "title": "MqSnifferDecl",
+      "type": "object"
+    },
+    "MqSnifferVerify": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Count"
+        },
+        "count_max": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Count Max"
+        },
+        "count_min": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Count Min"
+        },
+        "match": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Match"
+        },
+        "sniffer": {
+          "title": "Sniffer",
+          "type": "string"
+        },
+        "wait": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WaitSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "sniffer"
+      ],
+      "title": "MqSnifferVerify",
+      "type": "object"
+    },
+    "PythonCall": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "additionalProperties": true,
+          "title": "Args",
+          "type": "object"
+        },
+        "call": {
+          "title": "Call",
+          "type": "string"
+        }
+      },
+      "required": [
+        "call"
+      ],
+      "title": "PythonCall",
+      "type": "object"
+    },
+    "RedisTeardown": {
+      "additionalProperties": false,
+      "properties": {
+        "delete": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Delete",
+          "type": "array"
+        }
+      },
+      "title": "RedisTeardown",
+      "type": "object"
+    },
+    "RedisVerify": {
+      "additionalProperties": false,
+      "properties": {
+        "exists": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exists"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "ttl_between": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ttl Between"
+        },
+        "unprefixed": {
+          "default": false,
+          "title": "Unprefixed",
+          "type": "boolean"
+        },
+        "value": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "wait": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WaitSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "RedisVerify",
+      "type": "object"
+    },
+    "Request": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Body"
+        },
+        "body_template": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Body Template"
+        },
+        "body_vars": {
+          "additionalProperties": true,
+          "title": "Body Vars",
+          "type": "object"
+        },
+        "files": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Files",
+          "type": "object"
+        },
+        "form": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Form"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Headers",
+          "type": "object"
+        },
+        "method": {
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE",
+            "HEAD",
+            "OPTIONS"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw"
+        }
+      },
+      "required": [
+        "method",
+        "path"
+      ],
+      "title": "Request",
+      "type": "object"
+    },
+    "Requirements": {
+      "additionalProperties": false,
+      "properties": {
+        "databases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Databases",
+          "type": "array"
+        },
+        "rabbitmq": {
+          "default": false,
+          "title": "Rabbitmq",
+          "type": "boolean"
+        },
+        "redis": {
+          "default": false,
+          "title": "Redis",
+          "type": "boolean"
+        },
+        "services": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Services",
+          "type": "array"
+        },
+        "test_data": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Test Data",
+          "type": "array"
+        }
+      },
+      "title": "Requirements",
+      "type": "object"
+    },
+    "Setup": {
+      "additionalProperties": false,
+      "properties": {
+        "db": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Db",
+          "type": "array"
+        },
+        "python": {
+          "items": {
+            "$ref": "#/$defs/PythonCall"
+          },
+          "title": "Python",
+          "type": "array"
+        },
+        "rabbitmq": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/MqSnifferDecl"
+            },
+            "type": "array"
+          },
+          "title": "Rabbitmq",
+          "type": "object"
+        },
+        "redis": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Redis",
+          "type": "array"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/Step"
+          },
+          "title": "Steps",
+          "type": "array"
+        }
+      },
+      "title": "Setup",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "properties": {
+        "assert": {
+          "$ref": "#/$defs/Assert"
+        },
+        "extract": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Extract",
+          "type": "object"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "request": {
+          "$ref": "#/$defs/Request"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "service": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Service"
+        }
+      },
+      "required": [
+        "name",
+        "request"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "Teardown": {
+      "additionalProperties": false,
+      "properties": {
+        "db": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Db",
+          "type": "array"
+        },
+        "python": {
+          "items": {
+            "$ref": "#/$defs/PythonCall"
+          },
+          "title": "Python",
+          "type": "array"
+        },
+        "redis": {
+          "$ref": "#/$defs/RedisTeardown"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/Step"
+          },
+          "title": "Steps",
+          "type": "array"
+        }
+      },
+      "title": "Teardown",
+      "type": "object"
+    },
+    "Verify": {
+      "additionalProperties": false,
+      "properties": {
+        "db": {
+          "items": {
+            "$ref": "#/$defs/DbVerify"
+          },
+          "title": "Db",
+          "type": "array"
+        },
+        "python": {
+          "items": {
+            "$ref": "#/$defs/PythonCall"
+          },
+          "title": "Python",
+          "type": "array"
+        },
+        "rabbitmq": {
+          "items": {
+            "$ref": "#/$defs/MqSnifferVerify"
+          },
+          "title": "Rabbitmq",
+          "type": "array"
+        },
+        "redis": {
+          "items": {
+            "$ref": "#/$defs/RedisVerify"
+          },
+          "title": "Redis",
+          "type": "array"
+        }
+      },
+      "title": "Verify",
+      "type": "object"
+    },
+    "WaitSpec": {
+      "additionalProperties": false,
+      "description": "Poll a verify entry until it passes or `timeout_s` elapses (for writes\nthat land after the HTTP response: @Async, AFTER_COMMIT listeners, outbox).",
+      "properties": {
+        "interval_s": {
+          "default": 0.5,
+          "exclusiveMinimum": 0,
+          "title": "Interval S",
+          "type": "number"
+        },
+        "timeout_s": {
+          "exclusiveMinimum": 0,
+          "title": "Timeout S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "timeout_s"
+      ],
+      "title": "WaitSpec",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "covers": {
+      "items": {
+        "$ref": "#/$defs/CoverageRef"
+      },
+      "title": "Covers",
+      "type": "array"
+    },
+    "data": {
+      "$ref": "#/$defs/DataPlan"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "expectation": {
+      "default": "confirmed",
+      "enum": [
+        "confirmed",
+        "pending"
+      ],
+      "title": "Expectation",
+      "type": "string"
+    },
+    "headers": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Headers",
+      "type": "object"
+    },
+    "ids": {
+      "additionalProperties": {
+        "$ref": "#/$defs/IdSpecModel"
+      },
+      "title": "Ids",
+      "type": "object"
+    },
+    "known_defects": {
+      "items": {
+        "$ref": "#/$defs/KnownDefect"
+      },
+      "title": "Known Defects",
+      "type": "array"
+    },
+    "mutates": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mutates"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "parallel_safe": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parallel Safe"
+    },
+    "requires": {
+      "$ref": "#/$defs/Requirements"
+    },
+    "schema": {
+      "const": "v1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "service": {
+      "title": "Service",
+      "type": "string"
+    },
+    "service_headers": {
+      "additionalProperties": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "title": "Service Headers",
+      "type": "object"
+    },
+    "setup": {
+      "$ref": "#/$defs/Setup"
+    },
+    "source_commit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Commit"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "title": "Steps",
+      "type": "array"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Tags",
+      "type": "array"
+    },
+    "teardown": {
+      "$ref": "#/$defs/Teardown"
+    },
+    "verify": {
+      "$ref": "#/$defs/Verify"
+    }
+  },
+  "required": [
+    "schema",
+    "name",
+    "service",
+    "steps"
+  ],
+  "title": "Case",
+  "type": "object"
+}

@@ -1,0 +1,20 @@
+extends: base.yaml
+# Neutral example profile. Copy to <env>.yaml (e.g. staging.yaml) and point the
+# URLs/DSNs at your own infrastructure. There is no hardcoded service registry:
+# the keys under `services:` below define the valid service names for cases, and
+# each `databases:` key must match one of them.
+http:
+  default_timeout_s: 30
+services:
+  example:         { base_url: "http://example-service.internal/example" }
+  example-payment: { base_url: "http://example-service.internal/example" }
+databases:
+  example:         { dsn: "mysql://${EXAMPLE_EXAMPLE_DB_USER}:${EXAMPLE_EXAMPLE_DB_PASS}@db.internal:3306/example?useSSL=false&serverTimezone=UTC" }
+  example-payment: { dsn: "mysql://${EXAMPLE_EXAMPLE_PAYMENT_DB_USER}:${EXAMPLE_EXAMPLE_PAYMENT_DB_PASS}@db.internal:3306/example?useSSL=false&serverTimezone=UTC" }
+redis:
+  default: { url: "redis://redis.internal:6379/0" }
+rabbitmq:
+  default: { url: "amqp://${EXAMPLE_MQ_USER}:${EXAMPLE_MQ_PASS}@mq.internal:5672/" }
+# Seed values referenced by cases via ${ctx.profile.test_data.<key>}.
+test_data:
+  example_user_no: "0000000000000"

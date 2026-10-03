@@ -1,0 +1,5 @@
+http:
+  default_timeout_s: 30
+  retries:
+    count: 2          # retry on transient errors (502/503/504, ConnectError, ReadError)
+    backoff_s: 0.5    # exponential: 0.5s, 1.0s, 2.0s

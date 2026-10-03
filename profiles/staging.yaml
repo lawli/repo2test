@@ -1,0 +1,21 @@
+extends: base.yaml
+# Staging profile template. Point the URLs / DSNs at your own staging
+# infrastructure. The keys under `services:` define the valid service names
+# for cases — there is no hardcoded registry; every `databases:` key must
+# match a declared `services:` key.
+http:
+  default_timeout_s: 30
+services:
+  example:         { base_url: "http://example-service.stage.internal/example" }
+  example-payment: { base_url: "http://example-service.stage.internal/example" }
+databases:
+  example:         { dsn: "mysql://${STAGING_EXAMPLE_DB_USER}:${STAGING_EXAMPLE_DB_PASS}@db.stage.internal:3306/example?useSSL=false&serverTimezone=UTC" }
+  example-payment: { dsn: "mysql://${STAGING_EXAMPLE_PAYMENT_DB_USER}:${STAGING_EXAMPLE_PAYMENT_DB_PASS}@db.stage.internal:3306/example?useSSL=false&serverTimezone=UTC" }
+redis:
+  default: { url: "redis://redis.stage.internal:6379/0" }
+rabbitmq:
+  default: { url: "amqp://${STAGING_MQ_USER}:${STAGING_MQ_PASS}@mq.stage.internal:5672/" }
+# Seed values referenced by cases via ${ctx.profile.test_data.<key>}. Replace
+# with your own discovered fixtures; add a comment recording each discovery.
+test_data:
+  example_user_no: "0000000000000"

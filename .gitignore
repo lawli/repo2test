@@ -1,0 +1,24 @@
+# Local env / secrets (keep .env.example tracked as the template)
+.env
+
+# IDE
+.idea/
+
+# Python virtualenv
+.venv/
+
+# Test/report output
+reports/
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local design notes
+CONTEXT.md
+docs/adr/
+docs/plans/
+docs/implementation-agent-skill.md

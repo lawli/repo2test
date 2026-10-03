@@ -1,0 +1,34 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --locked --extra dev
+      # The workspace distribution tests run uv with --offline, so the cache must
+      # already hold the build backend and a resolved workspace environment.
+      - name: Warm the uv cache
+        run: |
+          uv build --wheel --out-dir "$RUNNER_TEMP/wheel"
+          uv run --locked apitest workspace init "$RUNNER_TEMP/workspace" \
+            --target . --ref HEAD --runner-wheel "$RUNNER_TEMP"/wheel/*.whl \
+            --runner-owner @ci --ci github
+          cd "$RUNNER_TEMP/workspace" && uv sync --locked
+      - run: uv run --locked pytest -q
+      - run: uv run --locked ruff check src tests_internal scripts hatch_build.py
+      - run: uv run --locked mypy src/apitest
+      - run: uv run --locked python -m apitest.schema.export
+      - run: git diff --exit-code -- src/apitest/schemas
