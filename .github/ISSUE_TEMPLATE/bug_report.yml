@@ -1,0 +1,56 @@
+name: Bug report
+description: Report a problem with the repo2test skills or the apitest runner
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Remove credentials and private business data before submitting.
+        Report security vulnerabilities privately instead; see [SECURITY.md](https://github.com/lawli/repo2test/blob/main/SECURITY.md).
+  - type: dropdown
+    id: host
+    attributes:
+      label: Host
+      options:
+        - Claude Code
+        - Codex
+        - None (apitest CLI only)
+    validations:
+      required: true
+  - type: input
+    id: host-version
+    attributes:
+      label: Host version
+  - type: input
+    id: runner-version
+    attributes:
+      label: Runner version
+      description: The `version` in the test workspace's `runner.toml`.
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or prompt
+      description: The exact command you ran or the prompt you gave the agent.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead, including any error text.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Minimal example
+      description: The smallest case, coverage fragment or profile that reproduces the problem.

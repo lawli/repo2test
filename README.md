@@ -244,8 +244,8 @@ expectations remain explicit gaps. All services in a workspace share one referen
 
 ### Skill installation prerequisites
 
-- Python **3.11+** and a local copy of this framework or an existing team test repository.
-  Use Git if you need to clone either repository.
+- Python **3.11+** (check with `python3 --version`) and a local copy of this framework or
+  an existing team test repository. Use Git if you need to clone either repository.
 - Claude Code or Codex with skill support to verify that the host discovers the entry.
 
 The installer uses only Python's standard library. Installing the entry does not require
@@ -262,7 +262,7 @@ already installed: verify it and add `--update` only when the user asked to upda
 ### Install from this repository
 
 If you already have this framework checked out, use its root directory. Otherwise, clone
-it:
+it outside your business repository, for example beside it:
 
 ```sh
 git clone https://github.com/lawli/repo2test.git repo2test
@@ -291,7 +291,8 @@ Installs the entry at `~/.agents/skills/repo2test`. Invoke it with `$repo2test` 
 Codex. See the [Codex skills documentation](https://developers.openai.com/codex/skills/)
 for host discovery rules.
 
-The entry is installed once per user and host. Continue to
+The entry is installed once per user and host. The installer copies it, so the installed
+skill does not depend on this checkout afterwards. Continue to
 [verify the installation](#verify-the-skill-installation).
 
 ### Install from an existing team test repository
@@ -308,7 +309,9 @@ python3 tools/install_entry.py --host claude
 ### Verify the skill installation
 
 The installer should exit successfully and print `Installed <absolute-entry-path>.`,
-followed by a note that existing workspaces remain pinned. Check that `SKILL.md`,
+followed by a note that existing workspaces remain pinned. Its second line says how to give
+the host access to a test workspace (`--add-dir`); that applies once a workspace exists and
+needs no action during installation. Check that `SKILL.md`,
 `scripts/locate.py` and `references/setup.md` exist in the installed entry. Run the check
 for your host:
 
@@ -330,9 +333,10 @@ ls ~/.agents/skills/repo2test/SKILL.md \
 
 Open a new agent session. In Claude Code, type `/` and confirm `repo2test` appears in the
 command menu. In Codex, type `$` and confirm `repo2test` appears in the skill selector.
-The installation is complete when the installer succeeds, the files exist, and the host
-discovers the skill. An agent that cannot access the interactive selector should report
-the completed file checks and leave host discovery explicitly unverified.
+The installation is complete when the installer succeeds and the files exist. Host
+discovery is the final confirmation and needs a new session: an agent that cannot access
+the interactive selector should report the installation as complete, state that host
+discovery is unverified, and tell the user how to check it.
 
 **An installation-only task ends here.** If invoking the skill reports a missing test
 workspace, the entry has loaded and needs first-use setup. `apitest workspace doctor`
@@ -359,14 +363,17 @@ and `/work/orders-e2e` as an empty destination. Replace those paths, `v1.4.0` wi
 deployed to your test environment, and `@qa-runners` with your runner maintainer's actual
 platform username or team.
 
-From the **repo2test framework checkout**:
+Download the runner wheel from the
+[latest release](https://github.com/lawli/repo2test/releases/latest) and compare its SHA-256
+with the one in the release notes. Replace `0.2.4` with that release's version:
 
 ```sh
-uv sync --locked
-uv build --wheel
-WHEEL="$(ls -t dist/apitest-*-py3-none-any.whl | head -1)"
+VERSION=0.2.4
+curl -fLO \
+  "https://github.com/lawli/repo2test/releases/download/v$VERSION/apitest-$VERSION-py3-none-any.whl"
+WHEEL="$PWD/apitest-$VERSION-py3-none-any.whl"
 
-uv run --locked apitest workspace init /work/orders-e2e \
+uvx --from "$WHEEL" apitest workspace init /work/orders-e2e \
   --target /work/orders \
   --ref v1.4.0 \
   --runner-wheel "$WHEEL" \
@@ -374,6 +381,7 @@ uv run --locked apitest workspace init /work/orders-e2e \
   --ci github
 ```
 
+This needs no framework checkout.
 All options shown are required; use `--ci gitlab` for GitLab. The destination must be
 empty or absent and outside the business repository. Initialization creates local files
 and resolves `uv.lock`, which needs package-index access; add `--offline` when the uv cache
@@ -381,10 +389,23 @@ already holds the packages. If resolution fails, `init` removes what it wrote, s
 command can be rerun. It never creates a remote: host the test repository alongside the
 business repository in the same organization or group through your team's normal Git workflow.
 
-Without a framework checkout, run the same command from a trusted wheel, such as
-`vendor/apitest-*.whl` in an existing team workspace:
-`uvx --from <wheel> apitest workspace init … --runner-wheel <wheel> …`. The installed entry
-carries these steps in `references/setup.md`.
+Any other trusted wheel works the same way, such as `vendor/apitest-*.whl` in an existing
+team workspace. From a framework checkout you can build one instead:
+
+```sh
+uv sync --locked
+uv build --wheel
+WHEEL="$(ls -t dist/apitest-*-py3-none-any.whl | head -1)"
+```
+
+Then run the `init` command above with `uv run --locked apitest` in place of
+`uvx --from "$WHEEL" apitest`. A build from a commit other than the release tag has the
+release's version but different bytes, and a workspace initialized from it cannot upgrade to
+that release; see [Releasing](#releasing).
+
+The installed entry carries the `init` steps in `references/setup.md`. It uses a wheel built
+in a framework checkout or taken from a team workspace and otherwise asks for one, so give
+the agent the path of the downloaded wheel when it should use the release.
 
 **For agents handling a setup request:** take each value from the user or the repository;
 never invent one.
@@ -656,14 +677,16 @@ python3 src/apitest/assets/install_entry.py --host codex --update
 Use `--host claude` for Claude Code. From a team test workspace, use
 `python3 tools/install_entry.py --host codex --update`. Existing workspaces keep their
 pinned rules and runner; upgrading those is a separate reviewed change. Always run the
-upgrade with the new framework checkout's CLI, because an older workspace CLI cannot apply
-newer layout changes. `$WHEEL` is the wheel built as in
+upgrade with the new wheel's CLI, because an older workspace CLI cannot apply newer layout
+changes. `$WHEEL` is the new wheel, obtained as in
 [Initialize a new workspace](#initialize-a-new-workspace):
 
 ```sh
-uv run --locked apitest --workspace /work/orders-e2e workspace upgrade \
+uvx --from "$WHEEL" apitest --workspace /work/orders-e2e workspace upgrade \
   --runner-wheel "$WHEEL"
 ```
+
+From the new framework checkout, `uv run --locked apitest` is equivalent.
 
 Review the printed compatibility notes; for example, 0.2.3 rejects literal credentials in
 profiles. Then run `uv sync --locked`,
@@ -680,6 +703,7 @@ versioned bundle from the runner maintainer; never edit `runner.toml` to bypass 
 |---|---|
 | The skill is not discovered | Follow the [installation checks](#verify-the-skill-installation) in a new host session. |
 | `Entry exists at <path>` | The entry is already installed. Verify it; add `--update` only to replace it deliberately. |
+| `Existing entry is a symlink` | The entry path is a link that another installation manages, and the installer does not write through it. `ls -l <path>` shows where it points; update the entry there, or ask the user which installation should own it. Do not remove a link you did not create. |
 | `init` reports that the partial workspace was removed | Fix package-index access, or add `--offline` when the uv cache holds the packages, then rerun the same command. |
 | `Choose an empty destination` | Select a new or empty directory. Do not delete files you did not create. |
 | `git failed: fatal: Needed a single revision` during `init` | The ref is not in the local business checkout. Ask the user to make it available; do not fetch there or substitute another ref. |
