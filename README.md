@@ -1,6 +1,7 @@
 # repo2test
 
-**Point Claude Code or Codex at your repo and get API tests with evidence behind every assertion.**
+**API tests built to question your code, not just copy it.** Claude Code or Codex builds a
+suite from your backend repo and adds end-to-end tests when you describe a change.
 
 [![CI](https://github.com/lawli/repo2test/actions/workflows/ci.yml/badge.svg)](https://github.com/lawli/repo2test/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/lawli/repo2test)](https://github.com/lawli/repo2test/releases)

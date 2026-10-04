@@ -1,6 +1,6 @@
 # repo2test
 
-**把 Claude Code 或 Codex 指向你的仓库，得到每条断言都有依据的 API 测试。**
+**API 测试要验证的是代码逻辑，不是把实现抄一遍。** Claude Code 或 Codex 能基于你的后端仓库生成一套测试，你描述变更时，它还会补上端到端测试。
 
 [English](README.md) · [真实运行结果](#真实运行结果) · [为什么用 repo2test](#为什么用-repo2test) ·
 [开始使用](#开始使用) · [适用范围](#适用范围)
