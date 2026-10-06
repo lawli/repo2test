@@ -1,6 +1,6 @@
 [project]
 name = "apitest"
-version = "0.2.4"
+version = "0.2.5"
 description = "Point Claude Code or Codex at your repo and get API tests with evidence behind every assertion"
 requires-python = ">=3.11"
 license = "Apache-2.0"

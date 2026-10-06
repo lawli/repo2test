@@ -66,8 +66,8 @@ Install the repo2test skill by following https://github.com/lawli/repo2test#inst
 /repo2test 为这个 repo 创建正常路径和边界情况的 API test cases，使用 local profile，不要运行测试。
 ```
 
-在 Codex 里这个 skill 写作 `$repo2test`。第一次使用时，agent 会提出在你的代码旁边创建
-一个测试仓库，并向你询问它无法得知的信息：部署的版本、服务地址，以及谁负责维护 runner。
+在 Codex 里这个 skill 写作 `$repo2test`。第一次使用时，agent 会在你的代码旁边准备
+一个测试仓库：它自己下载已发布的 runner，从你的仓库里推断出各项设置，然后请你确认一次。
 详见[英文 README 的首次设置一节](README.md#create-your-first-test-workspace)。
 
 ## 适用范围

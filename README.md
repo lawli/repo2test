@@ -159,9 +159,9 @@ Then start the agent in your backend repository and ask:
 /repo2test Create happy-path and edge-case API tests for this repository. Use the local profile. Do not run the tests.
 ```
 
-In Codex the skill is `$repo2test`. On first use the agent offers to create a test
-repository beside your code and asks for what it cannot know: the deployed version, the
-service URL and who maintains the runner. See
+In Codex the skill is `$repo2test`. On first use the agent prepares a test repository beside
+your code: it downloads the released runner, works out the settings from your repository
+and asks you to confirm them once. See
 [Create your first test workspace](#create-your-first-test-workspace).
 
 ## Scope
@@ -345,13 +345,45 @@ checks a test workspace's runner environment; it does not verify host skill disc
 
 ## Create your first test workspace
 
-Before first use, prepare:
+The agent does this on first use. Ask for tests in a repository that has no test workspace
+yet, and it checks Python, Git and uv, downloads the latest released runner wheel, verifies
+its SHA-256, and shows you the settings it worked out for one confirmation before it creates
+anything:
+
+| Setting | What the agent proposes |
+|---|---|
+| Workspace | `<repository>-e2e` beside the business repository. A workspace anywhere else is found later only when you start the agent in it or name it. |
+| Reference commit | The default branch head, marked as an estimate. Name the tag or commit deployed to your test environment to pin that instead. |
+| Runner maintainer | Your account on the Git host. |
+| CI | GitHub or GitLab, from the business repository's remote. |
+| Service URL | The local address your repository's configuration declares, when it declares one. Cases can be written before a URL is set. |
+
+After you confirm, it initializes the workspace, makes it a local Git repository with one
+commit and continues with your request. Three things stay with you: saying that an
+environment is non-production, supplying credentials and the URLs of remote environments,
+and hosting the test repository.
+
+You need:
 
 - Python **3.11+**, Git and [uv](https://docs.astral.sh/uv/), with access to third-party
-  Python packages for the runner environment.
+  Python packages for the runner environment. The agent offers to install uv when it is
+  missing.
 - An authenticated Claude Code or Codex session and a local business repository checkout.
-- A service URL for each API service under test. Supply other credentials and
-  infrastructure settings only for cases that need them.
+
+**In Codex** the default `workspace-write` sandbox blocks network access and restricts
+writes. The agent first requests approval to execute a blocked command, then continues
+itself after approval. Creation still waits for your confirmation of the settings.
+`--add-dir` permits ordinary writes in an additional directory, but protected paths such
+as `.git` can remain read-only. On Linux, sandbox placeholder directories can make an empty
+destination appear non-empty to `workspace init`, and prevent `git init` (verified with
+Codex CLI 0.160.0).
+
+Only when the session cannot approve the required operation does the agent give a manual
+step: relaunch with `-c sandbox_workspace_write.network_access=true` for network access,
+or run the listed initialization commands in your terminal after confirming the settings.
+After those commands succeed, the agent checks the workspace and continues. See
+[Codex permissions](https://learn.chatgpt.com/docs/agent-approvals-security) for the sandbox
+and approval controls. Claude Code asks for permission as it goes.
 
 **Already have a team test repository?** Clone it beside your business repository so its
 relative `[target].path` in `repo2test.toml` (usually `../<repository>`) resolves to your
@@ -359,17 +391,17 @@ local business checkout, then skip to [workspace configuration](#configure-the-t
 
 ### Initialize a new workspace
 
-Do this once for each business repository. Examples use `/work/orders` as the application
-and `/work/orders-e2e` as an empty destination. Replace those paths, `v1.4.0` with the ref
-deployed to your test environment, and `@qa-runners` with your runner maintainer's actual
-platform username or team.
+To do it by hand instead, run this once for each business repository. Examples use
+`/work/orders` as the application and `/work/orders-e2e` as an empty destination. Replace
+those paths, `v1.4.0` with the ref deployed to your test environment, and `@qa-runners`
+with your runner maintainer's actual platform username or team.
 
 Download the runner wheel from the
 [latest release](https://github.com/lawli/repo2test/releases/latest) and compare its SHA-256
-with the one in the release notes. Replace `0.2.4` with that release's version:
+with the one in the release notes. Replace `0.2.5` with that release's version:
 
 ```sh
-VERSION=0.2.4
+VERSION=0.2.5
 curl -fLO \
   "https://github.com/lawli/repo2test/releases/download/v$VERSION/apitest-$VERSION-py3-none-any.whl"
 WHEEL="$PWD/apitest-$VERSION-py3-none-any.whl"
@@ -404,19 +436,21 @@ Then run the `init` command above with `uv run --locked apitest` in place of
 release's version but different bytes, and a workspace initialized from it cannot upgrade to
 that release; see [Releasing](#releasing).
 
-The installed entry carries the `init` steps in `references/setup.md`. It uses a wheel built
-in a framework checkout or taken from a team workspace and otherwise asks for one, so give
-the agent the path of the downloaded wheel when it should use the release.
+The installed entry carries these steps in `references/setup.md`. Its
+`scripts/fetch_wheel.py` downloads the wheel: it reads only this repository's latest release
+and refuses a wheel whose SHA-256 differs from the one the release publishes. Name another
+wheel, such as your team's `vendor/apitest-*.whl`, when the agent should use that one.
 
-**For agents handling a setup request:** take each value from the user or the repository;
-never invent one.
+**For agents handling a setup request:** take each value from the user's request when it is
+there, otherwise derive it as below; never invent one. Show all of them in one confirmation
+before initializing.
 
 | Option | Source |
 |---|---|
 | `--target` | The business repository path, inside a Git repository. |
-| `--ref` | The tag or commit deployed to the test environment; it must resolve in the local business checkout. If a known ref is missing there, ask the user to make it available; do not fetch in the business checkout or substitute another ref. If only the deployment time is known, use `git -C <business> rev-list --first-parent -1 --before=<time> <branch>`. If neither is known, use the default branch head and add `--estimated-because "<reason>"`. |
-| `--runner-owner` | Ask the user for the runner maintainer, written as `@user` or `@group/team`. |
-| `--ci` | `github` or `gitlab`, matching where the test repository will be hosted; ask if unknown. |
+| `--ref` | The tag or commit the user names as deployed to the test environment; it must resolve in the local business checkout. If a named ref is missing there, ask the user to make it available; do not fetch in the business checkout or substitute another ref. If only the deployment time is known, use `git -C <business> rev-list --first-parent -1 --before=<time> <branch>`. If the user named neither, do not ask: use the default branch head and add `--estimated-because "<reason>"`. |
+| `--runner-owner` | The maintainer the user names, written as `@user` or `@group/team`; otherwise the current user's account on the Git host, from a platform tool such as `gh`. Ask only when no tool reports one. |
+| `--ci` | `github` or `gitlab`, from the host of the business repository's remote. Ask only when it has no remote or the host is neither. |
 
 ### Configure the test workspace
 
@@ -567,8 +601,9 @@ boundaries that matter most.
   described in [Best practices](#best-practices), and only when the remote is writable,
   authentication works and the default branch is known. Commit only files this request
   changed. If publishing fails, keep the local branch and report the missing prerequisite.
-- SHOULD ask only for missing inputs, such as service URLs, the deployed ref or the runner
-  owner, and continue source analysis meanwhile.
+- SHOULD derive setup values and confirm them once, ask separately only for an input that
+  has no default, such as the URL of a remote environment, and continue source analysis
+  meanwhile.
 
 ## Run tests without an agent
 

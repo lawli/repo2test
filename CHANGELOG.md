@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.2.5
+
+No action is needed in existing workspaces. The change is in the entry skill that an agent
+host installs: install it again with `--update` to get it.
+
+- First-use setup asks once instead of several times. The agent downloads the latest
+  released runner wheel itself, works out the reference commit, runner maintainer, CI and
+  local service URL from the repository, and shows them in one confirmation before it
+  creates the workspace. It still asks for a value that has no default, and it never marks
+  an environment non-production on its own.
+- The entry gains `scripts/fetch_wheel.py`. It reads only this repository's latest release
+  and refuses a wheel whose SHA-256 differs from the one the release publishes. A wheel the
+  user names is used instead of the download.
+- After initializing a workspace the agent makes it a local Git repository with one commit,
+  so later work shows as a diff. It does not create a remote.
+- When a host sandbox blocks the download or the writes, the agent first requests approval
+  to execute the blocked command and continues after approval. Codex permits ordinary
+  writes in added directories, but protected `.git` paths can still block initialization.
+  Only when approval is unavailable does the agent give the user the required relaunch or
+  terminal commands, instead of asking for a wheel.
+
 ## 0.2.4
 
 No action is needed in existing workspaces, with one exception: where a source checkout is

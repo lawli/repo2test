@@ -11,23 +11,27 @@ UI or load tests, say that repo2test does not apply and stop.
 Run `python3 scripts/locate.py --start <current-directory>` relative to this skill's
 directory and act on the JSON it prints:
 - `ready`: use the reported `workspace` and `business`.
-- `configuration-required`: if `writable` is false, give the host-specific step below; if
+- `configuration-required`: if `writable` is false, follow the permission recovery below; if
   `business` is null, ask only for the business repository path.
 - `workspace-missing` (exit 2): look for the existing `<repository>-e2e` in the same
-  group/org with an available Git platform tool, such as `gh` or `glab`. Otherwise confirm
-  from the business build file and application entry that the repository serves an HTTP
-  API, report a repository without one as out of scope, and ask whether to use an existing
-  workspace or initialize one at `suggested`.
-  To initialize, follow [setup](references/setup.md).
+  group/org with an available Git platform tool, such as `gh` or `glab`. When one exists,
+  offer to clone it beside the business repository. When none is found, confirm from the
+  business build file and application entry that the repository serves an HTTP API, and
+  report a repository without one as out of scope. Then prepare a new workspace at
+  `suggested` by following [setup](references/setup.md): work out every value it describes
+  yourself and ask the user once, before anything is created.
 - Any other output: report it verbatim and stop.
 Preserve existing files and do not silently create a remote.
 
 Before generation, verify the selected workspace is writable and run
-`uv sync --locked` there. If permissions or dependency access prevent this, give a
-concrete host-specific next step. Codex: relaunch with `--add-dir <workspace>
+`uv sync --locked` there. If the sandbox blocks a required command, request host approval
+to execute it with the needed permissions, then retry and continue after approval. Only
+when approval is unavailable, give a concrete host-specific recovery step. For ordinary
+workspace and cache writes in Codex, relaunch with `--add-dir <workspace>
 --add-dir "$(uv cache dir)"`, adding `-c sandbox_workspace_write.network_access=true`
-when uv must download packages. Claude Code: relaunch with `--add-dir <workspace>`.
-Installation does not grant those permissions.
+when uv must download packages. This does not make protected `.git` paths writable;
+initialization recovery is in [setup](references/setup.md). Claude Code: relaunch with
+`--add-dir <workspace>`. Installation does not grant those permissions.
 
 Run `uv run --locked apitest workspace doctor` before loading authoring rules.
 Proceed only when it reports no problems. It checks the wheel and pinned skill/entry
